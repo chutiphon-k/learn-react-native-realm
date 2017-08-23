@@ -12,19 +12,40 @@ import {
   View
 } from 'react-native';
 
-export default class testRealm extends Component {
+const Realm = require('realm');
+
+class testRealm extends Component {
+  state = {
+    realm: null
+  }
+
+  componentWillMount() {
+    Realm.open({
+      schema: [{name: 'Dog', properties: {name: 'string'}}]
+    }).then(realm => {
+      realm.write(() => {
+        realm.create('Dog', {name: 'Rex'});
+      });
+      this.setState({ realm });
+    });
+  }
+
   render() {
+    const info = this.state.realm
+      ? 'Number of dogs in this Realm: ' + this.state.realm.objects('Dog').length
+      : 'Loading...';
+
+      if (this.state.realm) {
+        // this.state.realm.objects('Dog').then(value => {
+        //   console.log(value)
+        // })
+        console.log(this.state.realm.objects('Dog').filtered('name = "Rex"')[0])
+      }
+
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
+          {info}
         </Text>
       </View>
     );
